@@ -14,6 +14,8 @@ def main():
   screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
   clock = pygame.time.Clock()
   dt = 0
+  score = 0
+  score_timer = 0
 
   updatable = pygame.sprite.Group()
   drawable = pygame.sprite.Group()
@@ -31,6 +33,7 @@ def main():
   while True:
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
+        print(f"\nSCORE: {score}")
         return
       
     updatable.update(dt)
@@ -38,6 +41,7 @@ def main():
     for asteroid in asteroids:
       if asteroid.is_colliding(player):
         print("Game over!")
+        print(f"\nSCORE: {score}")
         exit()
       
       for shot in shots:
@@ -55,6 +59,11 @@ def main():
 
     # delta time - ms to s + limit to 60fps
     dt = clock.tick(60) / 1000 
+    score_timer += dt
+    
+    if score_timer >= 1:
+      score_timer = 0
+      score += 1
 
 if __name__ == "__main__":
   main()
