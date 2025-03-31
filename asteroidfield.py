@@ -1,10 +1,12 @@
 import pygame
 import random
-from asteroid import Asteroid
+# classes from files
+from asteroid import *
 from constants import *
 
 
 class AsteroidField(pygame.sprite.Sprite):
+    # [for each edge: [direction vector, lambda func (pass 0-1 as %, returns position along that edge - offset by max asteroid size)]  ]
     edges = [
         [
             pygame.Vector2(1, 0),
@@ -41,11 +43,16 @@ class AsteroidField(pygame.sprite.Sprite):
         if self.spawn_timer > ASTEROID_SPAWN_RATE:
             self.spawn_timer = 0
 
-            # spawn a new asteroid at a random edge
+            # get random edge
             edge = random.choice(self.edges)
+            # get random velocity away from edge
             speed = random.randint(40, 100)
             velocity = edge[0] * speed
+            # get random angle
             velocity = velocity.rotate(random.randint(-30, 30))
+            # gen random position along edge
             position = edge[1](random.uniform(0, 1))
+            # pick random size
             kind = random.randint(1, ASTEROID_KINDS)
+            # spawn asteroid
             self.spawn(ASTEROID_MIN_RADIUS * kind, position, velocity)
