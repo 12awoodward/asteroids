@@ -1,6 +1,7 @@
 import pygame
 import random
 # classes from files
+from logger import log_event
 from constants import *
 from circleshape import *
 
@@ -19,6 +20,8 @@ class Asteroid(CircleShape):
         self.kill()
         if self.radius <= ASTEROID_MIN_RADIUS:
             return
+        
+        log_event("asteroid_split")
       
         # random value
         direction_diff = random.uniform(20, 50)

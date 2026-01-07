@@ -1,5 +1,7 @@
 import pygame
 # Classes from files
+from logger import log_state
+from logger import log_event
 from constants import *
 from player import *
 from asteroid import *
@@ -40,6 +42,7 @@ def main():
 
     # Game Loop
     while True:
+        log_state()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 print(f"\nSCORE: {score}")
@@ -51,6 +54,7 @@ def main():
         for asteroid in asteroids:
             # with player
             if asteroid.is_colliding(player):
+                log_event("player_hit")
                 print("Game over!")
                 print(f"\nSCORE: {score}")
                 exit()
@@ -58,6 +62,7 @@ def main():
             # with bullets
             for shot in shots:
                 if shot.is_colliding(asteroid):
+                    log_event("asteroid_shot")
                     shot.kill()
                     asteroid.split()
                     break
