@@ -1,12 +1,14 @@
 import pygame
+
 # Classes from files
-from logger import log_state
-from logger import log_event
-from constants import *
-from player import *
-from asteroid import *
-from asteroidfield import *
-from shot import *
+from logger import log_state, log_event
+from constants import SCREEN_HEIGHT, SCREEN_WIDTH
+from circleshape import CircleShape
+from player import Player
+from asteroid import Asteroid
+from asteroidfield import AsteroidField
+from shot import Shot
+
 
 def main():
     print(pygame.init())
@@ -15,11 +17,11 @@ def main():
     print(f"Screen height: {SCREEN_HEIGHT}")
 
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    #setup clock for timing
+    # setup clock for timing
     clock = pygame.time.Clock()
     # delta time
-    dt = 0
-    #score
+    dt: float = 0
+    # score
     score = 0
     score_timer = 0
 
@@ -32,13 +34,13 @@ def main():
     # fill object groups
     Player.containers = (updatable, drawable)
     Asteroid.containers = (updatable, drawable, asteroids)
-    AsteroidField.containers = (updatable)
+    AsteroidField.containers = updatable
     Shot.containers = (updatable, drawable, shots)
 
     # player at center
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     # asteroid spawner
-    asteroid_field = AsteroidField()
+    _ = AsteroidField()
 
     # Game Loop
     while True:
@@ -47,43 +49,48 @@ def main():
             if event.type == pygame.QUIT:
                 print(f"\nSCORE: {score}")
                 return
-        
+
         updatable.update(dt)
 
         # asteroid collisions
         for asteroid in asteroids:
-            # with player
-            if asteroid.is_colliding(player):
-                log_event("player_hit")
-                print("Game over!")
-                print(f"\nSCORE: {score}")
-                exit()
-            
-            # with bullets
-            for shot in shots:
-                if shot.is_colliding(asteroid):
-                    log_event("asteroid_shot")
-                    shot.kill()
-                    asteroid.split()
-                    break
-        
+            if isinstance(asteroid, Asteroid):
+                # with player
+                if asteroid.is_colliding(player):
+                    log_event("player_hit")
+                    print("Game over!")
+                    print(f"\nSCORE: {score}")
+                    exit()
+
+                # with bullets
+                for shot in shots:
+                    if isinstance(shot, Shot):
+                        if shot.is_colliding(asteroid):
+                            log_event("asteroid_shot")
+                            shot.kill()
+                            asteroid.split()
+                            break
+
         # draw bg
         screen.fill("black")
 
         for item in drawable:
-            item.draw(screen)
+            if isinstance(item, CircleShape):
+                item.draw(screen)
 
         # show frame
         pygame.display.flip()
 
         # delta time - ms to s + limit to 60fps
-        dt = clock.tick(60) / 1000 
+        dt = clock.tick(60) / 1000
         score_timer += dt
-        
+
         # increment score every second
         if score_timer >= 1:
             score_timer = 0
             score += 1
 
+
 if __name__ == "__main__":
     main()
+

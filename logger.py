@@ -1,3 +1,5 @@
+from typing import Any
+import pygame
 import inspect
 import json
 import math
@@ -40,40 +42,41 @@ def log_state():
     local_vars = frame_back.f_locals.copy()
 
     screen_size = []
-    game_state = {}
+    game_state: dict[str, Any] = {}
 
     for key, value in local_vars.items():
-        if "pygame" in str(type(value)) and hasattr(value, "get_size"):
+        if isinstance(value, pygame.surface.Surface):
             screen_size = value.get_size()
 
-        if hasattr(value, "__class__") and "Group" in value.__class__.__name__:
-            sprites_data = []
+        if isinstance(value, pygame.sprite.Group):
+            sprites_data: list[dict[str, Any]] = []
 
             for i, sprite in enumerate(value):
-                if i >= _SPRITE_SAMPLE_LIMIT:
-                    break
+                if isinstance(sprite, pygame.sprite.Sprite):
+                    if i >= _SPRITE_SAMPLE_LIMIT:
+                        break
 
-                sprite_info = {"type": sprite.__class__.__name__}
+                    sprite_info: dict[str, Any] = {"type": sprite.__class__.__name__}
 
-                if hasattr(sprite, "position"):
-                    sprite_info["pos"] = [
-                        round(sprite.position.x, 2),
-                        round(sprite.position.y, 2),
-                    ]
+                    if hasattr(sprite, "position"):
+                        sprite_info["pos"] = [
+                            round(sprite.position.x, 2),
+                            round(sprite.position.y, 2),
+                        ]
 
-                if hasattr(sprite, "velocity"):
-                    sprite_info["vel"] = [
-                        round(sprite.velocity.x, 2),
-                        round(sprite.velocity.y, 2),
-                    ]
+                    if hasattr(sprite, "velocity"):
+                        sprite_info["vel"] = [
+                            round(sprite.velocity.x, 2),
+                            round(sprite.velocity.y, 2),
+                        ]
 
-                if hasattr(sprite, "radius"):
-                    sprite_info["rad"] = sprite.radius
+                    if hasattr(sprite, "radius"):
+                        sprite_info["rad"] = sprite.radius
 
-                if hasattr(sprite, "rotation"):
-                    sprite_info["rot"] = round(sprite.rotation, 2)
+                    if hasattr(sprite, "rotation"):
+                        sprite_info["rot"] = round(sprite.rotation, 2)
 
-                sprites_data.append(sprite_info)
+                    sprites_data.append(sprite_info)
 
             game_state[key] = {"count": len(value), "sprites": sprites_data}
 
@@ -99,7 +102,7 @@ def log_state():
 
             game_state[key] = sprite_info
 
-    entry = {
+    entry: dict[str, Any] = {
         "timestamp": now.strftime("%H:%M:%S.%f")[:-3],
         "elapsed_s": math.floor((now - _start_time).total_seconds()),
         "frame": _frame_count,
@@ -115,12 +118,12 @@ def log_state():
     _state_log_initialized = True
 
 
-def log_event(event_type, **details):
+def log_event(event_type: str, **details: Any):
     global _event_log_initialized
 
     now = datetime.now()
 
-    event = {
+    event: dict[str, Any] = {
         "timestamp": now.strftime("%H:%M:%S.%f")[:-3],
         "elapsed_s": math.floor((now - _start_time).total_seconds()),
         "frame": _frame_count,
